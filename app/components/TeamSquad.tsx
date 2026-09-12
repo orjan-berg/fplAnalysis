@@ -71,6 +71,7 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
             element_type: p.element_type,
             event_points: p.event_points || 0,
             photo: p.photo,
+            team: p.team,
           });
         });
         setPlayers(playerMap);
