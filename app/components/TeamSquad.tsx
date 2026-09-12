@@ -229,20 +229,35 @@ function PlayerCard({
     WOL: 'bg-yellow-600',
   };
 
+  const imageUrl = `https://resources.premierleague.com/premierleague/photos/players/40x40/${pick.player.photo}`;
   const teamShort = team?.short_name || '?';
   const bgColor = TEAM_COLORS[teamShort] || 'bg-gray-400';
 
   return (
     <div className={`flex flex-col items-center text-center ${isSub ? 'opacity-75' : ''}`}>
-      <div className={`relative mb-2 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center ${bgColor}`}>
-        <span className="text-white font-bold text-sm sm:text-lg">{teamShort}</span>
+      <div className="relative mb-2 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-gray-300">
+        <img
+          src={imageUrl}
+          alt={`${pick.player.first_name} ${pick.player.second_name}`}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src =
+              'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E';
+          }}
+        />
+        {/* Team badge overlay */}
+        <div
+          className={`absolute bottom-0 right-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-white flex items-center justify-center text-xs font-bold text-white ${bgColor}`}
+        >
+          {teamShort.substring(0, 1)}
+        </div>
         {pick.is_captain && (
-          <div className="absolute top-0 right-0 bg-yellow-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+          <div className="absolute top-0 left-0 bg-yellow-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
             C
           </div>
         )}
         {pick.is_vice_captain && (
-          <div className="absolute top-0 right-0 bg-blue-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-white">
+          <div className="absolute top-0 left-0 bg-blue-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold text-white">
             V
           </div>
         )}
