@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import TeamForm from './components/TeamForm';
 import TeamInfo from './components/TeamInfo';
 import LeagueStandings from './components/LeagueStandings';
+import TeamSquad from './components/TeamSquad';
 
 interface TeamData {
   player_first_name: string;
@@ -51,6 +52,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gwStatus, setGwStatus] = useState<string | null>(null);
+  const [showSquad, setShowSquad] = useState(false);
+  const [entryId, setEntryId] = useState<string>('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -65,14 +68,15 @@ export default function Home() {
     }
   }, []);
 
-  const handleSearch = async (entryId: string, leagueIds: string[]) => {
+  const handleSearch = async (inputEntryId: string, leagueIds: string[]) => {
     setIsLoading(true);
     setError(null);
     setGwStatus(null);
+    setEntryId(inputEntryId);
 
     try {
       // Fetch team data
-      const teamRes = await fetch(`/api/team?id=${entryId}`);
+      const teamRes = await fetch(`/api/team?id=${inputEntryId}`);
       if (!teamRes.ok) {
         throw new Error('Failed to fetch team data');
       }
@@ -200,7 +204,19 @@ export default function Home() {
 
         {teamData && (
           <div className="space-y-8">
-            <TeamInfo data={teamData} />
+            <div className="flex gap-4">
+              <TeamInfo data={teamData} />
+              <button
+                onClick={() => setShowSquad(!showSquad)}
+                className="h-fit px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                {showSquad ? 'Hide Squad' : 'View Squad'}
+              </button>
+            </div>
+
+            {showSquad && entryId && (
+              <TeamSquad entryId={entryId} event={teamData.current_event} />
+            )}
 
             {leaguesData.length > 0 && (
               <div className="space-y-6">
