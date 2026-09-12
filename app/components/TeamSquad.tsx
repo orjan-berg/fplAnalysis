@@ -229,34 +229,12 @@ function PlayerCard({
     WOL: 'bg-yellow-600',
   };
 
-  // Map FPL team IDs to shirt image team IDs
-  const TEAM_SHIRT_ID_MAP: Record<string, number> = {
-    ARS: 1,
-    AVL: 2,
-    BOU: 3,
-    BRE: 4,
-    CHE: 8,
-    CRY: 9,
-    EVE: 11,
-    FUL: 14,
-    IPS: 20,
-    LEI: 8,
-    LIV: 10,
-    MCI: 11,
-    MUN: 1,
-    NEW: 4,
-    NFO: 17,
-    SOU: 20,
-    TOT: 6,
-    WHU: 21,
-    WOL: 39,
-  };
-
-  const shirtTeamId = team ? TEAM_SHIRT_ID_MAP[team.short_name] || pick.player.team : pick.player.team;
   const isGoalkeeper = pick.player.element_type === 1;
   const shirtUrl = isGoalkeeper
-    ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${shirtTeamId}_1-110.webp`
-    : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${shirtTeamId}-110.webp`;
+    ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}_1-110.webp`
+    : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}-110.webp`;
+
+  console.log(`${pick.player.first_name} ${pick.player.second_name} (${team?.short_name}): team_api_id=${pick.player.team} → shirt_url: ${shirtUrl}`);
   const teamShort = team?.short_name || '?';
 
   return (
