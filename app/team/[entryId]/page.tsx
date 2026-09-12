@@ -1,8 +1,7 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import TeamSquad from '@/app/components/TeamSquad';
 
 interface TeamData {
@@ -20,7 +19,7 @@ interface TeamData {
 }
 
 export default function TeamPage() {
-  const params = useParams();
+  const router = useRouter();
   const [entryId, setEntryId] = useState<string | null>(null);
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,9 +72,12 @@ export default function TeamPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <header className="bg-blue-600 text-white py-8 shadow">
         <div className="max-w-6xl mx-auto px-4">
-          <Link href="/" className="text-blue-100 hover:text-white mb-4 inline-block">
+          <button
+            onClick={() => router.back()}
+            className="text-blue-100 hover:text-white mb-4 inline-block cursor-pointer font-medium"
+          >
             ← Back
-          </Link>
+          </button>
           <h1 className="text-4xl font-bold">{teamData.name}</h1>
           <p className="text-blue-100 mt-2">
             {teamData.player_first_name} {teamData.player_last_name}
