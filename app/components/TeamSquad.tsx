@@ -234,7 +234,7 @@ function PlayerCard({
     ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}_1-110.webp`
     : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}-110.webp`;
 
-  console.log(`${pick.player.first_name} ${pick.player.second_name} (${team?.short_name}): team_api_id=${pick.player.team} → shirt_url: ${shirtUrl}`);
+  console.log(`${pick.player.first_name} ${pick.player.second_name} (${team?.short_name} - ${team?.name}): API_ID=${pick.player.team} → Shirt_URL: ${shirtUrl}`);
   const teamShort = team?.short_name || '?';
 
   return (
