@@ -4,7 +4,7 @@ interface Standing {
   event_total: number;
   total: number;
   player_name: string;
-  entry_id: number;
+  entry: number;
 }
 
 interface LeagueData {
@@ -58,7 +58,7 @@ export default function LeagueStandings({ data, rankChanges }: LeagueStandingsPr
                   <RankChange change={rankChanges?.[result.entry_name]} />
                 </td>
                 <td className="px-4 py-3 text-sm font-medium">
-                  <a href={`/team/${result.entry_id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                  <a href={`/team/${result.entry}`} className="text-blue-600 hover:text-blue-800 hover:underline">
                     {result.entry_name}
                   </a>
                 </td>

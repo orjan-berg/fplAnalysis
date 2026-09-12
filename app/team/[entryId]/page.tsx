@@ -27,11 +27,13 @@ export default function TeamPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Handle hydration - entryId from params
-    if (params?.entryId) {
-      setEntryId(params.entryId as string);
+    // Get entryId from URL path
+    const pathSegments = window.location.pathname.split('/');
+    const id = pathSegments[2]; // /team/123 -> [0]='', [1]='team', [2]='123'
+    if (id) {
+      setEntryId(id);
     }
-  }, [params]);
+  }, []);
 
   useEffect(() => {
     const fetchTeam = async () => {
