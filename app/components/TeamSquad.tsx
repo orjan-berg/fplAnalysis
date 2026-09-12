@@ -229,7 +229,11 @@ function PlayerCard({
     WOL: 'bg-yellow-600',
   };
 
-  const shirtUrl = `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}_1-110.webp`;
+  // Goalkeeper (element_type 1) uses different shirt format
+  const isGoalkeeper = pick.player.element_type === 1;
+  const shirtUrl = isGoalkeeper
+    ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}_1-110.webp`
+    : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}-110.webp`;
   const teamShort = team?.short_name || '?';
 
   return (
