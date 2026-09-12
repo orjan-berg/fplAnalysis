@@ -229,12 +229,35 @@ function PlayerCard({
     WOL: 'bg-yellow-600',
   };
 
+  // Map FPL API team IDs to shirt image team IDs
+  const SHIRT_TEAM_MAP: Record<number, number> = {
+    1: 3,   // Arsenal
+    2: 2,   // Aston Villa (assumed)
+    3: 5,   // Bournemouth (assumed)
+    4: 4,   // Brentford (assumed)
+    5: 36,  // Brighton
+    6: 6,   // Tottenham
+    7: 8,   // Chelsea (assumed)
+    8: 11,  // Fulham (assumed)
+    9: 9,   // Crystal Palace (assumed)
+    10: 10, // Liverpool
+    11: 15, // Everton (assumed)
+    12: 40, // Ipswich Town
+    13: 30, // Bournemouth/Leicester (assumed)
+    14: 7,  // Newcastle (assumed)
+    15: 43, // Manchester City
+    16: 1,  // Manchester United
+    17: 14, // Wolverhampton (assumed)
+    18: 17, // Nottingham Forest
+    19: 20, // Southampton (assumed)
+    20: 56, // Sunderland
+  };
+
+  const shirtTeamId = SHIRT_TEAM_MAP[pick.player.team] || pick.player.team;
   const isGoalkeeper = pick.player.element_type === 1;
   const shirtUrl = isGoalkeeper
-    ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}_1-110.webp`
-    : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${pick.player.team}-110.webp`;
-
-  console.log(`${pick.player.first_name} ${pick.player.second_name} (${team?.short_name} - ${team?.name}): API_ID=${pick.player.team} → Shirt_URL: ${shirtUrl}`);
+    ? `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${shirtTeamId}_1-110.webp`
+    : `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${shirtTeamId}-110.webp`;
   const teamShort = team?.short_name || '?';
 
   return (
