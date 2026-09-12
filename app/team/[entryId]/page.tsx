@@ -21,19 +21,36 @@ interface TeamData {
 
 export default function TeamPage() {
   const params = useParams();
-  const entryId = params.entryId as string;
+  const [entryId, setEntryId] = useState<string | null>(null);
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Handle hydration - entryId from params
+    if (params?.entryId) {
+      setEntryId(params.entryId as string);
+    }
+  }, [params]);
+
+  useEffect(() => {
     const fetchTeam = async () => {
+      if (!entryId) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
 
       try {
         const res = await fetch(`/api/team?id=${entryId}`);
-        if (!res.ok) throw new Error('Failed to fetch team');
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Failed to fetch team');
+        }
+
         const data = await res.json();
         setTeamData(data);
       } catch (err) {
@@ -43,7 +60,7 @@ export default function TeamPage() {
       }
     };
 
-    if (entryId) fetchTeam();
+    fetchTeam();
   }, [entryId]);
 
   if (isLoading) return <div className="text-center py-8">Loading team...</div>;
