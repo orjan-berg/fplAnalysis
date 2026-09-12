@@ -132,29 +132,31 @@ export default function Home() {
           });
         }
 
-        setRankChanges(changes);
-
-        // Save current ranks to localStorage (only if GW is finished)
+        // Only show rank changes if GW is finished
         if (isFinished) {
-          const currentRanks: StoredLeagueRanks = {
-            gameweek: currentGw,
-            ranks: {},
-          };
-          leagues.forEach((league) => {
-            const leagueId = String(league.league.id);
-            currentRanks.ranks[leagueId] = {};
-
-            league.standings.results.forEach((result) => {
-              currentRanks.ranks[leagueId][result.entry_name] = result.rank;
-            });
-          });
-
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('fpl_league_ranks', JSON.stringify(currentRanks));
-            console.log('Saved ranks for GW', currentGw);
-          }
+          setRankChanges(changes);
         } else {
-          console.log('GW not finished yet, not saving ranks');
+          setRankChanges({});
+          console.log('GW not finished, rank changes hidden');
+        }
+
+        // Always save current ranks to localStorage (for all GW statuses)
+        const currentRanks: StoredLeagueRanks = {
+          gameweek: currentGw,
+          ranks: {},
+        };
+        leagues.forEach((league) => {
+          const leagueId = String(league.league.id);
+          currentRanks.ranks[leagueId] = {};
+
+          league.standings.results.forEach((result) => {
+            currentRanks.ranks[leagueId][result.entry_name] = result.rank;
+          });
+        });
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('fpl_league_ranks', JSON.stringify(currentRanks));
+          console.log('Saved ranks for GW', currentGw);
         }
       } else {
         setLeaguesData([]);
