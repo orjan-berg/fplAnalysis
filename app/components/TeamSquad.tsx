@@ -17,6 +17,13 @@ interface Player {
   element_type: number;
   event_points: number;
   photo: string;
+  team: number;
+}
+
+interface Team {
+  id: number;
+  name: string;
+  short_name: string;
 }
 
 interface ElementType {
@@ -30,13 +37,11 @@ interface TeamSquadProps {
   event: number;
 }
 
-const POSITION_ORDER = ['GK', 'DEF', 'MID', 'FWD'];
-const POSITION_LIMIT: Record<string, number> = { GK: 1, DEF: 4, MID: 5, FWD: 3 };
-
 export default function TeamSquad({ entryId, event }: TeamSquadProps) {
   const [picks, setPicks] = useState<Pick[]>([]);
   const [players, setPlayers] = useState<Map<number, Player>>(new Map());
   const [elementTypes, setElementTypes] = useState<Map<number, ElementType>>(new Map());
+  const [teams, setTeams] = useState<Map<number, Team>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,6 +84,16 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
           });
         });
         setElementTypes(typeMap);
+
+        const teamMap = new Map<number, Team>();
+        playersData.teams.forEach((tm: any) => {
+          teamMap.set(tm.id, {
+            id: tm.id,
+            name: tm.name,
+            short_name: tm.short_name,
+          });
+        });
+        setTeams(teamMap);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -95,10 +110,10 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
 
   // Organize players by position
   const squadByPosition: Record<string, (Pick & { player: Player; typeName: string })[]> = {
-    GK: [],
-    DEF: [],
-    MID: [],
-    FWD: [],
+    Goalkeeper: [],
+    Defender: [],
+    Midfielder: [],
+    Forward: [],
     SUB: [],
   };
 
@@ -113,7 +128,7 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
     const isStarter = pick.position <= 11;
 
     if (isStarter) {
-      if (squadByPosition[positionKey]) {
+      if (positionKey in squadByPosition) {
         squadByPosition[positionKey].push({
           ...pick,
           player,
@@ -133,20 +148,37 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-2xl font-bold mb-8 text-gray-900">Squad - Gameweek {event}</h3>
 
+      <div className="mb-4 p-3 bg-gray-100 rounded text-xs">
+        <p className="font-mono">
+          GK: {squadByPosition['Goalkeeper']?.length || 0} | DEF:{' '}
+          {squadByPosition['Defender']?.length || 0} | MID: {squadByPosition['Midfielder']?.length || 0} | FWD:{' '}
+          {squadByPosition['Forward']?.length || 0} | SUB: {squadByPosition['SUB']?.length || 0}
+        </p>
+      </div>
+
       {/* Starting XI */}
       <div className="mb-12">
         <h4 className="text-lg font-semibold text-gray-700 mb-6">Starting XI</h4>
         <div className="space-y-6">
-          {POSITION_ORDER.map((pos) => (
-            <div key={pos}>
-              <p className="text-sm font-semibold text-gray-600 mb-3">{pos}</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {squadByPosition[pos]?.map((pick) => (
-                  <PlayerCard key={pick.element} pick={pick} />
-                ))}
+          {['Goalkeeper', 'Defender', 'Midfielder', 'Forward'].map((pos) => {
+            const players = squadByPosition[pos] || [];
+            return (
+              <div key={pos}>
+                <p className="text-sm font-semibold text-gray-600 mb-3">
+                  {pos} ({players.length})
+                </p>
+                {players.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {players.map((pick) => (
+                      <PlayerCard key={pick.element} pick={pick} team={teams.get(pick.player.team)} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm">No players</p>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -156,7 +188,7 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
           <h4 className="text-lg font-semibold text-gray-700 mb-3">Substitutes</h4>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {squadByPosition.SUB.map((pick) => (
-              <PlayerCard key={pick.element} pick={pick} isSub />
+              <PlayerCard key={pick.element} pick={pick} team={teams.get(pick.player.team)} isSub />
             ))}
           </div>
         </div>
@@ -167,27 +199,42 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
 
 function PlayerCard({
   pick,
+  team,
   isSub = false,
 }: {
   pick: Pick & { player: Player; typeName: string };
+  team?: Team;
   isSub?: boolean;
 }) {
-  const imageUrl = `https://resources.premierleague.com/premierleague/photos/players/40x40/${pick.player.photo}`;
+  const TEAM_COLORS: Record<string, string> = {
+    ARS: 'bg-red-600',
+    AVL: 'bg-blue-900',
+    BOU: 'bg-red-600',
+    BRE: 'bg-orange-600',
+    CHE: 'bg-blue-600',
+    CRY: 'bg-blue-700',
+    EVE: 'bg-blue-600',
+    FUL: 'bg-black',
+    IPS: 'bg-cyan-400',
+    LEI: 'bg-blue-600',
+    LIV: 'bg-red-600',
+    MCI: 'bg-sky-400',
+    MUN: 'bg-red-700',
+    NEW: 'bg-black',
+    NFO: 'bg-red-600',
+    SOU: 'bg-white border-2 border-black',
+    TOT: 'bg-white border-2 border-gray-400',
+    WHU: 'bg-purple-700',
+    WOL: 'bg-yellow-600',
+  };
+
+  const teamShort = team?.short_name || '?';
+  const bgColor = TEAM_COLORS[teamShort] || 'bg-gray-400';
 
   return (
-    <div
-      className={`flex flex-col items-center text-center ${isSub ? 'opacity-75' : ''}`}
-    >
-      <div className="relative mb-2 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-gray-100 border-2 border-gray-300">
-        <img
-          src={imageUrl}
-          alt={`${pick.player.first_name} ${pick.player.second_name}`}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E';
-          }}
-        />
+    <div className={`flex flex-col items-center text-center ${isSub ? 'opacity-75' : ''}`}>
+      <div className={`relative mb-2 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center ${bgColor}`}>
+        <span className="text-white font-bold text-sm sm:text-lg">{teamShort}</span>
         {pick.is_captain && (
           <div className="absolute top-0 right-0 bg-yellow-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
             C

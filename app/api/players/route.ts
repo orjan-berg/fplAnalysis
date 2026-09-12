@@ -11,8 +11,12 @@ export async function GET() {
     }
 
     const data = await response.json();
-    // Return only elements (players)
-    return NextResponse.json({ elements: data.elements, element_types: data.element_types });
+    // Return elements (players), element_types, and teams
+    return NextResponse.json({
+      elements: data.elements,
+      element_types: data.element_types,
+      teams: data.teams,
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch players' }, { status: 500 });
   }
