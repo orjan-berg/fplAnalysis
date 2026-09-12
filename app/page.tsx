@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TeamForm from './components/TeamForm';
 import TeamInfo from './components/TeamInfo';
 import LeagueStandings from './components/LeagueStandings';
@@ -35,15 +35,40 @@ interface LeagueData {
   };
 }
 
+interface StoredLeagueRanks {
+  gameweek: number;
+  ranks: {
+    [leagueId: string]: {
+      [entryName: string]: number;
+    };
+  };
+}
+
 export default function Home() {
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [leaguesData, setLeaguesData] = useState<LeagueData[]>([]);
+  const [rankChanges, setRankChanges] = useState<Record<string, Record<string, number>>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gwStatus, setGwStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('fpl_league_ranks');
+        if (stored) {
+          setRankChanges(JSON.parse(stored));
+        }
+      } catch (e) {
+        console.error('Failed to load stored ranks:', e);
+      }
+    }
+  }, []);
 
   const handleSearch = async (entryId: string, leagueIds: string[]) => {
     setIsLoading(true);
     setError(null);
+    setGwStatus(null);
 
     try {
       // Fetch team data
@@ -53,6 +78,20 @@ export default function Home() {
       }
       const team = await teamRes.json();
       setTeamData(team);
+
+      // Fetch bootstrap data to check GW status
+      const bootstrapRes = await fetch('/api/bootstrap');
+      if (!bootstrapRes.ok) {
+        throw new Error('Failed to fetch bootstrap data');
+      }
+      const bootstrap = await bootstrapRes.json();
+      const currentGw = team.current_event;
+      const gwData = bootstrap.events.find((e: any) => e.id === currentGw);
+      const isFinished = gwData?.finished || false;
+      const gwName = gwData?.name || `GW${currentGw}`;
+
+      console.log(`GW ${currentGw} status:`, gwData?.status, 'Finished:', isFinished);
+      setGwStatus(gwData?.status);
 
       // Fetch league data
       if (leagueIds.length > 0) {
@@ -64,6 +103,59 @@ export default function Home() {
           })
         );
         setLeaguesData(leagues);
+
+        // Load previous ranks from localStorage
+        let previousData: StoredLeagueRanks | null = null;
+        if (typeof window !== 'undefined') {
+          const stored = localStorage.getItem('fpl_league_ranks');
+          if (stored) {
+            previousData = JSON.parse(stored);
+            console.log('Loaded previous data:', previousData);
+          }
+        }
+
+        // Calculate rank changes only if stored data is from same GW
+        const changes: Record<string, Record<string, number>> = {};
+        if (previousData && previousData.gameweek === currentGw) {
+          leagues.forEach((league) => {
+            const leagueId = String(league.league.id);
+            changes[leagueId] = {};
+
+            league.standings.results.forEach((result) => {
+              const previousRank = previousData!.ranks[leagueId]?.[result.entry_name];
+              if (previousRank !== undefined) {
+                const change = result.rank - previousRank;
+                changes[leagueId][result.entry_name] = change;
+                console.log(`${result.entry_name}: ${previousRank} → ${result.rank} (${change > 0 ? '+' : ''}${change})`);
+              }
+            });
+          });
+        }
+
+        setRankChanges(changes);
+
+        // Save current ranks to localStorage (only if GW is finished)
+        if (isFinished) {
+          const currentRanks: StoredLeagueRanks = {
+            gameweek: currentGw,
+            ranks: {},
+          };
+          leagues.forEach((league) => {
+            const leagueId = String(league.league.id);
+            currentRanks.ranks[leagueId] = {};
+
+            league.standings.results.forEach((result) => {
+              currentRanks.ranks[leagueId][result.entry_name] = result.rank;
+            });
+          });
+
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('fpl_league_ranks', JSON.stringify(currentRanks));
+            console.log('Saved ranks for GW', currentGw);
+          }
+        } else {
+          console.log('GW not finished yet, not saving ranks');
+        }
       } else {
         setLeaguesData([]);
       }
@@ -97,6 +189,13 @@ export default function Home() {
           </div>
         )}
 
+        {gwStatus && gwStatus !== 'finished' && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg mb-8">
+            <p className="font-semibold">⏳ Gameweek in progress</p>
+            <p>Rank changes will be tracked once results are official.</p>
+          </div>
+        )}
+
         {teamData && (
           <div className="space-y-8">
             <TeamInfo data={teamData} />
@@ -105,7 +204,11 @@ export default function Home() {
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-gray-900">League Standings</h2>
                 {leaguesData.map((league) => (
-                  <LeagueStandings key={league.league.id} data={league} />
+                  <LeagueStandings
+                    key={league.league.id}
+                    data={league}
+                    rankChanges={rankChanges[String(league.league.id)]}
+                  />
                 ))}
               </div>
             )}
