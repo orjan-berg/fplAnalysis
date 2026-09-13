@@ -6,6 +6,7 @@ import TeamInfo from './components/TeamInfo';
 import LeagueStandings from './components/LeagueStandings';
 import TeamSquad from './components/TeamSquad';
 import ChipStats from './components/ChipStats';
+import MostCaptained from './components/MostCaptained';
 
 interface TeamData {
   player_first_name: string;
@@ -51,6 +52,13 @@ interface ChipPlay {
   num_played: number;
 }
 
+interface Player {
+  id: number;
+  first_name: string;
+  second_name: string;
+  team: number;
+}
+
 export default function Home() {
   const [teamData, setTeamData] = useState<TeamData | null>(null);
   const [leaguesData, setLeaguesData] = useState<LeagueData[]>([]);
@@ -62,6 +70,9 @@ export default function Home() {
   const [entryId, setEntryId] = useState<string>('');
   const [chipPlays, setChipPlays] = useState<ChipPlay[]>([]);
   const [currentEvent, setCurrentEvent] = useState<number>(0);
+  const [mostCaptained, setMostCaptained] = useState<number | undefined>();
+  const [mostViceCaptained, setMostViceCaptained] = useState<number | undefined>();
+  const [players, setPlayers] = useState<Player[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -109,6 +120,26 @@ export default function Home() {
       // Set chip plays data
       if (gwData?.chip_plays) {
         setChipPlays(gwData.chip_plays);
+      }
+
+      // Set most captained data
+      if (gwData?.most_captained) {
+        setMostCaptained(gwData.most_captained);
+      }
+      if (gwData?.most_vice_captained) {
+        setMostViceCaptained(gwData.most_vice_captained);
+      }
+
+      // Set players data
+      if (bootstrap.elements) {
+        setPlayers(
+          bootstrap.elements.map((p: any) => ({
+            id: p.id,
+            first_name: p.first_name,
+            second_name: p.second_name,
+            team: p.team,
+          }))
+        );
       }
 
       // Fetch league data
@@ -205,6 +236,17 @@ export default function Home() {
         {chipPlays.length > 0 && (
           <div className="mb-8">
             <ChipStats chipPlays={chipPlays} eventNumber={currentEvent} />
+          </div>
+        )}
+
+        {(mostCaptained || mostViceCaptained) && players.length > 0 && (
+          <div className="mb-8">
+            <MostCaptained
+              mostCaptained={mostCaptained}
+              mostViceCaptained={mostViceCaptained}
+              players={players}
+              eventNumber={currentEvent}
+            />
           </div>
         )}
 
