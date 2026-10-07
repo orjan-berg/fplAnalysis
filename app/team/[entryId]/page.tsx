@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import TeamSquad from '@/app/components/TeamSquad';
+import Transfers from '@/app/components/Transfers';
 
 interface TeamData {
   player_first_name: string;
@@ -69,14 +70,14 @@ export default function TeamPage() {
   if (!teamData) return <div className="text-center py-8">No team data</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col">
       <header className="bg-blue-600 text-white py-8 shadow">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-full mx-auto px-4">
           <button
             onClick={() => router.back()}
             className="text-blue-100 hover:text-white mb-4 inline-block cursor-pointer font-medium"
           >
-            ← Back
+            ← Tilbake
           </button>
           <h1 className="text-4xl font-bold">{teamData.name}</h1>
           <p className="text-blue-100 mt-2">
@@ -85,7 +86,23 @@ export default function TeamPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside className="w-56 bg-white shadow-lg">
+          <nav className="p-6 space-y-2">
+            <h3 className="text-sm font-semibold text-gray-600 uppercase mb-6 px-2">Meny</h3>
+            <button
+              onClick={() => router.back()}
+              className="w-full text-left px-4 py-3 rounded-lg transition font-medium text-gray-700 hover:bg-gray-100"
+            >
+              ← Tilbake til Ligaer
+            </button>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 bg-gradient-to-b from-blue-50 to-white">
+          <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Team Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-lg shadow p-4">
@@ -112,11 +129,16 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* Squad */}
-        {entryId && (
-          <TeamSquad entryId={entryId} event={teamData.current_event} />
-        )}
-      </main>
+            {/* Transfers and Squad */}
+            {entryId && (
+              <div className="space-y-6">
+                <Transfers entryId={entryId} currentEvent={teamData.current_event} />
+                <TeamSquad entryId={entryId} event={teamData.current_event} />
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
