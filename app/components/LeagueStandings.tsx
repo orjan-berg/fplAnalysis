@@ -1,5 +1,6 @@
 interface Standing {
   rank: number;
+  last_rank: number;
   entry_name: string;
   event_total: number;
   total: number;
@@ -31,7 +32,7 @@ function RankChange({ change }: { change?: number }) {
   return <span className="text-green-600 font-semibold text-sm">↑ {Math.abs(change)}</span>;
 }
 
-export default function LeagueStandings({ data, rankChanges }: LeagueStandingsProps) {
+export default function LeagueStandings({ data }: LeagueStandingsProps) {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
@@ -51,22 +52,25 @@ export default function LeagueStandings({ data, rankChanges }: LeagueStandingsPr
             </tr>
           </thead>
           <tbody className="divide-y">
-            {data.standings.results.map((result) => (
-              <tr key={result.entry_name} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 text-sm font-semibold text-gray-900">{result.rank}</td>
-                <td className="px-4 py-3 text-sm">
-                  <RankChange change={rankChanges?.[result.entry_name]} />
-                </td>
-                <td className="px-4 py-3 text-sm font-medium">
-                  <a href={`/team/${result.entry}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                    {result.entry_name}
-                  </a>
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">{result.player_name}</td>
-                <td className="px-4 py-3 text-sm text-right text-gray-900 font-medium">{result.event_total}</td>
-                <td className="px-4 py-3 text-sm text-right text-blue-600 font-semibold">{result.total}</td>
-              </tr>
-            ))}
+            {data.standings.results.map((result) => {
+              const rankChange = result.rank - result.last_rank;
+              return (
+                <tr key={result.entry_name} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 text-sm font-semibold text-gray-900">{result.rank}</td>
+                  <td className="px-4 py-3 text-sm">
+                    <RankChange change={rankChange} />
+                  </td>
+                  <td className="px-4 py-3 text-sm font-medium">
+                    <a href={`/team/${result.entry}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                      {result.entry_name}
+                    </a>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{result.player_name}</td>
+                  <td className="px-4 py-3 text-sm text-right text-gray-900 font-medium">{result.event_total}</td>
+                  <td className="px-4 py-3 text-sm text-right text-blue-600 font-semibold">{result.total}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

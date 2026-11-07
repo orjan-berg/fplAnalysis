@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "project": {
+    "name": "FPL Analysis",
+    "description": "Fantasy Premier League analysis and insights web application"
+  },
+  "superpowers": {
+    "methodology": "enabled",
+    "workflow": "design-develop-review-merge"
+  },
+  "hooks": {
+    "before_commit": {
+      "checks": [
+        "ensure_branch_is_feature_branch",
+        "require_clear_commit_message"
+      ]
+    },
+    "before_merge": {
+      "checks": [
+        "run_code_review",
+        "verify_manual_testing",
+        "confirm_all_tasks_complete"
+      ]
+    }
+  },
+  "conventions": {
+    "branch_naming": {
+      "feature": "feature/descriptive-name",
+      "bugfix": "fix/descriptive-name",
+      "refactor": "refactor/descriptive-name"
+    },
+    "commit_message": {
+      "format": "Title\n\n- Bullet point 1\n- Bullet point 2",
+      "require_body": true,
+      "max_title_length": 72
+    },
+    "code_style": {
+      "player_names": "Always use 'web_name' field, never first_name + second_name",
+      "comments": "Only add when explaining WHY, not WHAT",
+      "testing": "All UI components must be manually tested in browser",
+      "error_handling": "Validate at system boundaries, trust internal code"
+    }
+  },
+  "development": {
+    "test_server": "http://localhost:3000",
+    "dev_command": "npm run dev",
+    "required_testing": [
+      "desktop (1920px)",
+      "tablet (768px)",
+      "mobile (400px)",
+      "edge_cases",
+      "regression_check"
+    ]
+  },
+  "tools": {
+    "planning": "/plan",
+    "task_tracking": "TodoWrite",
+    "code_review": "/code-review",
+    "branch_isolation": "git checkout -b feature/...",
+    "documentation": "CLAUDE.md, SUPERPOWERS.md"
+  },
+  "allowed_git_commands": [
+    "git status",
+    "git diff",
+    "git log",
+    "git checkout -b feature/",
+    "git checkout main",
+    "git add [specific files]",
+    "git commit -m",
+    "git push origin feature/",
+    "git merge feature/"
+  ],
+  "prohibited_actions": [
+    "git reset --hard (without explicit user request)",
+    "git push --force (without explicit user request)",
+    "git rebase -i (use merge instead)",
+    "git clean -f (without explicit user request)",
+    "Merging to main without code review"
+  ],
+  "automation": {
+    "todo_reminders": true,
+    "browser_testing_required": true,
+    "code_review_before_merge": true,
+    "manual_testing_verification": true
+  }
+}

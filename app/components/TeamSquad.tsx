@@ -14,6 +14,7 @@ interface Player {
   id: number;
   first_name: string;
   second_name: string;
+  web_name: string;
   element_type: number;
   event_points: number;
   photo: string;
@@ -69,6 +70,7 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
             id: p.id,
             first_name: p.first_name,
             second_name: p.second_name,
+            web_name: p.web_name,
             element_type: p.element_type,
             event_points: p.event_points || 0,
             photo: p.photo,
@@ -262,7 +264,7 @@ function PlayerCard({
         )}
       </div>
       <p className="text-xs sm:text-sm font-medium text-gray-900">
-        {pick.player.first_name.charAt(0)}. {pick.player.second_name}
+        {pick.player.web_name}
       </p>
       <p className={`text-sm font-bold ${pick.player.event_points >= 0 ? 'text-green-600' : 'text-red-600'}`}>
         {pick.player.event_points}
