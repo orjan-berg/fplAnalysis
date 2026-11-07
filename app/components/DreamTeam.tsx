@@ -91,7 +91,7 @@ export default function DreamTeam() {
             total_points: p.total_points || 0,
             typeName: typeMap.get(p.element_type)?.singular_name || 'Unknown',
           }))
-          .sort((a, b) => {
+          .sort((a: Player & { typeName: string }, b: Player & { typeName: string }) => {
             // Sort by position first, then by points descending
             if (a.element_type !== b.element_type) {
               return a.element_type - b.element_type;

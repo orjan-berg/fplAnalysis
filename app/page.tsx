@@ -13,6 +13,7 @@ import Transfers from './components/Transfers';
 import TransferAnalysis from './components/TransferAnalysis';
 import GameweekPointsChart from './components/GameweekPointsChart';
 import DreamTeam from './components/DreamTeam';
+import BlankGameweeks from './components/BlankGameweeks';
 
 interface TeamData {
   player_first_name: string;
@@ -36,6 +37,8 @@ interface LeagueData {
   standings: {
     results: Array<{
       rank: number;
+      last_rank: number;
+      entry: number;
       entry_name: string;
       event_total: number;
       total: number;
@@ -83,7 +86,7 @@ export default function Home() {
   const [mostViceCaptainedCount, setMostViceCaptainedCount] = useState<number>(0);
   const [totalManagers, setTotalManagers] = useState<number>(0);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [activeView, setActiveView] = useState<'overview' | 'squad' | 'leagues' | 'points' | 'transfers' | 'dream_team'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'squad' | 'leagues' | 'points' | 'transfers' | 'dream_team' | 'blank_gws'>('overview');
   const [allEvents, setAllEvents] = useState<any[]>([]);
   const [selectedGw, setSelectedGw] = useState<number>(0);
 
@@ -290,7 +293,7 @@ export default function Home() {
               const leagueId = String(league.league.id);
               changes[leagueId] = {};
 
-              league.standings.results.forEach((result) => {
+              league.standings.results.forEach((result: LeagueData['standings']['results'][number]) => {
                 const previousRank = previousData!.ranks[leagueId]?.[result.entry_name];
                 if (previousRank !== undefined) {
                   const change = result.rank - previousRank;
@@ -319,7 +322,7 @@ export default function Home() {
           const leagueId = String(league.league.id);
           currentRanks.ranks[leagueId] = {};
 
-          league.standings.results.forEach((result) => {
+          league.standings.results.forEach((result: LeagueData['standings']['results'][number]) => {
             currentRanks.ranks[leagueId][result.entry_name] = result.rank;
           });
         });
@@ -481,6 +484,16 @@ export default function Home() {
             >
               Dream Team
             </button>
+            <button
+              onClick={() => setActiveView('blank_gws')}
+              className={`w-full text-left px-4 py-3 rounded-lg transition font-medium ${
+                activeView === 'blank_gws'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              Blanke GW
+            </button>
             <Link
               href="/fixtures"
               className="w-full text-left px-4 py-3 rounded-lg transition font-medium text-gray-700 hover:bg-gray-100 block"
@@ -521,13 +534,13 @@ export default function Home() {
             </div>
           )}
 
-          {activeView !== 'dream_team' && chipPlays.length > 0 && (
+          {activeView !== 'dream_team' && activeView !== 'blank_gws' && chipPlays.length > 0 && (
             <div className="mb-8">
               <ChipStats chipPlays={chipPlays} eventNumber={currentEvent} />
             </div>
           )}
 
-          {activeView !== 'dream_team' && (mostCaptained || mostViceCaptained) && players.length > 0 && (
+          {activeView !== 'dream_team' && activeView !== 'blank_gws' && (mostCaptained || mostViceCaptained) && players.length > 0 && (
             <div className="mb-8">
               <MostCaptained
                 mostCaptained={mostCaptained}
@@ -604,7 +617,11 @@ export default function Home() {
             </div>
           )}
 
-            {!teamData && !isLoading && (
+            {activeView === 'blank_gws' && (
+              <BlankGameweeks />
+            )}
+
+            {!teamData && !isLoading && activeView !== 'blank_gws' && (
               <div className="text-center text-gray-600 py-12">
                 <p className="text-lg">Enter your team ID and league IDs to get started</p>
               </div>
