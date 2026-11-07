@@ -16,7 +16,7 @@ export async function GET() {
     const bootstrap = await bootstrapRes.json();
 
     const finishedGws: number[] = bootstrap.events
-      .filter((e: any) => e.finished)
+      .filter((e: any) => e.finished && e.data_checked)
       .map((e: any) => e.id);
 
     const liveByGw = await Promise.all(
