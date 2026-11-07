@@ -14,9 +14,8 @@ interface TeamData {
   summary_event_points: number;
   summary_event_rank: number;
   current_event: number;
-  bank: number;
-  free_transfers: number;
-  transfers_on_bank: number;
+  last_deadline_bank: number;
+  last_deadline_total_transfers: number;
 }
 
 export default function TeamPage() {
@@ -119,13 +118,13 @@ export default function TeamPage() {
 
           <div className="bg-white rounded-lg shadow p-4">
             <p className="text-xs text-gray-600 uppercase font-semibold">Bank</p>
-            <p className="text-2xl font-bold text-purple-600">£{(teamData.bank / 10).toFixed(1)}m</p>
+            <p className="text-2xl font-bold text-purple-600">£{(teamData.last_deadline_bank / 10).toFixed(1)}m</p>
           </div>
 
           <div className="bg-white rounded-lg shadow p-4">
             <p className="text-xs text-gray-600 uppercase font-semibold">Transfers</p>
-            <p className="text-2xl font-bold text-orange-600">{teamData.free_transfers}</p>
-            <p className="text-xs text-gray-500">In bank: {teamData.transfers_on_bank}</p>
+            <p className="text-2xl font-bold text-orange-600">{teamData.last_deadline_total_transfers}</p>
+            <p className="text-xs text-gray-500">Denne sesongen</p>
           </div>
         </div>
 

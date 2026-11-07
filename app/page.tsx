@@ -24,9 +24,14 @@ interface TeamData {
   summary_event_points: number;
   summary_event_rank: number;
   current_event: number;
-  bank: number;
-  free_transfers: number;
-  transfers_on_bank: number;
+  last_deadline_bank: number;
+  last_deadline_total_transfers: number;
+}
+
+interface GwStats {
+  event: number;
+  points: number;
+  rank: number;
 }
 
 interface LeagueData {
@@ -89,6 +94,26 @@ export default function Home() {
   const [activeView, setActiveView] = useState<'overview' | 'squad' | 'leagues' | 'points' | 'transfers' | 'dream_team' | 'blank_gws'>('overview');
   const [allEvents, setAllEvents] = useState<any[]>([]);
   const [selectedGw, setSelectedGw] = useState<number>(0);
+  const [gwStats, setGwStats] = useState<GwStats | null>(null);
+
+  useEffect(() => {
+    if (!entryId || !selectedGw) return;
+
+    const fetchGwStats = async () => {
+      try {
+        const res = await fetch(`/api/entry-history?id=${entryId}`);
+        if (!res.ok) throw new Error('Failed to fetch entry history');
+        const history = await res.json();
+        const gw = history.current?.find((h: any) => h.event === selectedGw);
+        setGwStats(gw ? { event: gw.event, points: gw.points, rank: gw.rank } : null);
+      } catch (err) {
+        console.log('Could not fetch GW stats:', err);
+        setGwStats(null);
+      }
+    };
+
+    fetchGwStats();
+  }, [entryId, selectedGw]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -572,13 +597,13 @@ export default function Home() {
             <div>
               {activeView === 'overview' && (
                 <div className="space-y-8">
-                  <TeamInfo data={teamData} />
+                  <TeamInfo data={teamData} gwStats={gwStats} />
                 </div>
               )}
 
               {activeView === 'squad' && entryId && (
                 <div className="space-y-6">
-                  <TeamInfo data={teamData} />
+                  <TeamInfo data={teamData} gwStats={gwStats} />
                   <Transfers entryId={entryId} currentEvent={teamData.current_event} />
                   <TeamSquad entryId={entryId} event={selectedGw || teamData.current_event} />
                 </div>

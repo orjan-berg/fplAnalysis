@@ -7,16 +7,26 @@ interface TeamData {
   summary_event_points: number;
   summary_event_rank: number;
   current_event: number;
-  bank: number;
-  free_transfers: number;
-  transfers_on_bank: number;
+  last_deadline_bank: number;
+  last_deadline_total_transfers: number;
+}
+
+interface GwStats {
+  event: number;
+  points: number;
+  rank: number;
 }
 
 interface TeamInfoProps {
   data: TeamData;
+  gwStats?: GwStats | null;
 }
 
-export default function TeamInfo({ data }: TeamInfoProps) {
+export default function TeamInfo({ data, gwStats }: TeamInfoProps) {
+  const gwEvent = gwStats?.event ?? data.current_event;
+  const gwPoints = gwStats?.points ?? data.summary_event_points;
+  const gwRank = gwStats?.rank ?? data.summary_event_rank;
+
   return (
     <div className="bg-white rounded-lg shadow p-6 space-y-4">
       <div className="border-b pb-4">
@@ -34,20 +44,20 @@ export default function TeamInfo({ data }: TeamInfoProps) {
         </div>
 
         <div className="bg-green-50 p-4 rounded">
-          <p className="text-xs text-gray-600 uppercase font-semibold">Gameweek {data.current_event} Points</p>
-          <p className="text-3xl font-bold text-green-600">{data.summary_event_points}</p>
-          <p className="text-xs text-gray-500">Rank: #{data.summary_event_rank}</p>
+          <p className="text-xs text-gray-600 uppercase font-semibold">Gameweek {gwEvent} Points</p>
+          <p className="text-3xl font-bold text-green-600">{gwPoints}</p>
+          <p className="text-xs text-gray-500">Rank: #{gwRank}</p>
         </div>
 
         <div className="bg-purple-50 p-4 rounded">
           <p className="text-xs text-gray-600 uppercase font-semibold">Bank</p>
-          <p className="text-2xl font-bold text-purple-600">£{(data.bank / 10).toFixed(1)}m</p>
+          <p className="text-2xl font-bold text-purple-600">£{(data.last_deadline_bank / 10).toFixed(1)}m</p>
         </div>
 
         <div className="bg-orange-50 p-4 rounded">
           <p className="text-xs text-gray-600 uppercase font-semibold">Transfers</p>
-          <p className="text-2xl font-bold text-orange-600">{data.free_transfers}</p>
-          <p className="text-xs text-gray-500">In bank: {data.transfers_on_bank}</p>
+          <p className="text-2xl font-bold text-orange-600">{data.last_deadline_total_transfers}</p>
+          <p className="text-xs text-gray-500">Denne sesongen</p>
         </div>
       </div>
     </div>

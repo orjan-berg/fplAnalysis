@@ -44,6 +44,7 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
   const [players, setPlayers] = useState<Map<number, Player>>(new Map());
   const [elementTypes, setElementTypes] = useState<Map<number, ElementType>>(new Map());
   const [teams, setTeams] = useState<Map<number, Team>>(new Map());
+  const [livePoints, setLivePoints] = useState<Record<number, number>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +59,11 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
         if (!picksRes.ok) throw new Error('Failed to fetch picks');
         const picksData = await picksRes.json();
         setPicks(picksData.picks);
+
+        const liveRes = await fetch(`/api/event-live?event=${event}`);
+        if (!liveRes.ok) throw new Error('Failed to fetch live points');
+        const liveData = await liveRes.json();
+        setLivePoints(liveData.points);
 
         // Fetch players
         const playersRes = await fetch('/api/players');
@@ -123,8 +129,9 @@ export default function TeamSquad({ entryId, event }: TeamSquadProps) {
   };
 
   picks.forEach((pick) => {
-    const player = players.get(pick.element);
-    if (!player) return;
+    const basePlayer = players.get(pick.element);
+    if (!basePlayer) return;
+    const player = { ...basePlayer, event_points: livePoints[pick.element] ?? 0 };
 
     const type = elementTypes.get(player.element_type);
     if (!type) return;

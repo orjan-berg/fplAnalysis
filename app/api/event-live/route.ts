@@ -19,6 +19,7 @@ export async function GET(request: Request) {
 
     // Extract captain statistics for all players
     const captainStats: Record<number, { selected_by: number; selected_by_type: Record<string, number> }> = {};
+    const points: Record<number, number> = {};
 
     if (data.elements) {
       data.elements.forEach((element: any) => {
@@ -26,11 +27,13 @@ export async function GET(request: Request) {
           selected_by: element.selected_by || 0,
           selected_by_type: element.selected_by_type || {},
         };
+        points[element.id] = element.stats?.total_points || 0;
       });
     }
 
     return Response.json({
       captainStats,
+      points,
       total_elements: data.elements?.length || 0,
     });
   } catch (error) {
