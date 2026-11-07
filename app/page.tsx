@@ -534,13 +534,13 @@ export default function Home() {
             </div>
           )}
 
-          {activeView !== 'dream_team' && activeView !== 'blank_gws' && chipPlays.length > 0 && (
+          {activeView !== 'dream_team' && activeView !== 'blank_gws' && activeView !== 'squad' && chipPlays.length > 0 && (
             <div className="mb-8">
               <ChipStats chipPlays={chipPlays} eventNumber={currentEvent} />
             </div>
           )}
 
-          {activeView !== 'dream_team' && activeView !== 'blank_gws' && (mostCaptained || mostViceCaptained) && players.length > 0 && (
+          {activeView !== 'dream_team' && activeView !== 'blank_gws' && activeView !== 'squad' && (mostCaptained || mostViceCaptained) && players.length > 0 && (
             <div className="mb-8">
               <MostCaptained
                 mostCaptained={mostCaptained}
