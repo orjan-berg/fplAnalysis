@@ -14,6 +14,7 @@ interface BlankPlayer {
 }
 
 const POSITIONS: Record<number, string> = { 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' };
+const MIN_PLAYED_RATIO = 0.95;
 
 export default function BlankGameweeks() {
   const [players, setPlayers] = useState<BlankPlayer[]>([]);
@@ -44,14 +45,18 @@ export default function BlankGameweeks() {
   }, []);
 
   const rows = useMemo(() => {
-    const filtered = players.filter((p) => position === 0 || p.element_type === position);
+    const filtered = players.filter(
+      (p) =>
+        (position === 0 || p.element_type === position) &&
+        p.played / finishedGws.length >= MIN_PLAYED_RATIO
+    );
     return filtered.sort((a, b) => {
       const diff = order === 'fewest'
         ? a.blankGws.length - b.blankGws.length
         : b.blankGws.length - a.blankGws.length;
       return diff || b.total_points - a.total_points;
     });
-  }, [players, position, order]);
+  }, [players, finishedGws, position, order]);
 
   if (isLoading) return <div className="text-center py-8">Laster blanke gameweeks...</div>;
   if (error) return <div className="text-red-600 text-center py-8">Feil: {error}</div>;
@@ -66,7 +71,7 @@ export default function BlankGameweeks() {
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900">Blanke gameweeks</h2>
         <p className="text-gray-600 mt-2">
-          Gameweeks der spilleren bare fikk poeng for spilte minutter. Basert på {finishedGws.length} ferdige gameweeks.
+          Gameweeks der spilleren bare fikk poeng for spilte minutter. Basert på {finishedGws.length} ferdige gameweeks. Vises kun spillere som har spilt minst {MIN_PLAYED_RATIO * 100}% av disse.
         </p>
       </div>
 
